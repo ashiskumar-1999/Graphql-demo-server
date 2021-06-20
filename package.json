@@ -1,0 +1,10 @@
+{
+  "name": "graphql-demo-server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Ashis Kumar Sahoo",
+  "license": "MIT",
+  "dependencies": {
+    "graphql": "^15.5.0"
+  }
+}
