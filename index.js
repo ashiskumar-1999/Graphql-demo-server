@@ -1,37 +1,79 @@
 "use strict"
 
-const { graphql, buildSchema } = require("graphql")
+const {
+  GraphQLSchema,
+  GraphQLObjectType,
+  GraphQLNonNull,
+  GraphQLList,
+  GraphQLInt,
+  GraphQLBoolean,
+  GraphQLString,
+  GraphQLID,
+} = require("graphql")
+const express = require("express")
+const { graphqlHTTP } = require("express-graphql")
+const { getProfileById, getProfiles } = require("./src/data/index")
 
-const schema = buildSchema(`
+const PORT = process.env.PORT || 3000
+const server = express()
 
-type Query {
-  id: ID,
-    name: String,
-    age: Int,
-    married: Boolean,
-}
+const profileType = new GraphQLObjectType({
+  name: "profile",
+  description: "Profile of an user",
+  fields: {
+    id: {
+      type: GraphQLID,
+      description: "The ID of User",
+    },
+    name: {
+      type: GraphQLString,
+      description: "The name of User",
+    },
+    age: {
+      type: GraphQLInt,
+      description: "The age of user",
+    },
+    married: {
+      type: GraphQLBoolean,
+      description: "The married status of user",
+    },
+  },
+})
 
-type Schema {
-    query : Query
-}
-`)
+const queryType = new GraphQLObjectType({
+  name: "QueryType",
+  description: " The root query type",
+  fields: {
+    profiles: {
+      type: new GraphQLList(profileType),
+      resolve: () => getProfiles,
+    },
+    profile: {
+      type: profileType,
+      args: {
+        id: {
+          type: new GraphQLNonNull(GraphQLID),
+          description: "The id of a user",
+        },
+      },
+      resolve: (_, args) => {
+        return getProfileById(args.id)
+      },
+    },
+  },
+})
+const schema = new GraphQLSchema({
+  query: queryType,
+})
 
-const resolvers = {
-  id: () => "1",
-  name: () => "",
-  age: () => 21,
-  married: () => true,
-}
+server.use(
+  "/graphql",
+  graphqlHTTP({
+    schema,
+    graphiql: true,
+  })
+)
 
-const query = `
-query myFirstQuery{
-  id  
-  name
-  age
-  married
-
-}
-`
-graphql(schema, query, resolvers)
-  .then((result) => console.log(result))
-  .catch((error) => console.log(error))
+server.listen(PORT, () => {
+  console.log(`Listening on ${PORT}`)
+})

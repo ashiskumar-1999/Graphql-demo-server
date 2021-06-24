@@ -5,6 +5,8 @@
   "author": "Ashis Kumar Sahoo",
   "license": "MIT",
   "dependencies": {
+    "express": "^4.17.1",
+    "express-graphql": "^0.12.0",
     "graphql": "^15.5.0"
   }
 }
